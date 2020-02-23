@@ -181,7 +181,14 @@ def train_distill(epoch, train_loader, module_list, criterion_list, optimizer, o
         else:
             raise NotImplementedError(opt.distill)
 
-        loss = opt.gamma * loss_cls + opt.alpha * loss_div + opt.beta * loss_kd
+        if opt.distill == 'hint':
+            # FitNet Fix
+            if epoch <= opt.init_epochs:
+                loss = opt.beta * loss_kd
+            else:
+                loss = opt.gamma * loss_cls + opt.alpha * loss_div
+        else:
+            loss = opt.gamma * loss_cls + opt.alpha * loss_div + opt.beta * loss_kd
 
         acc1, acc5 = accuracy(logit_s, target, topk=(1, 5))
         losses.update(loss.item(), input.size(0))
